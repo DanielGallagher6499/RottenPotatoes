@@ -9,8 +9,31 @@ class MoviesController < ApplicationController
   def index
     @all_ratings = Movie.all_ratings
     @sort = params[:sort]
-     
-    @movies = Movie.all.order(@sort)
+    @ratings_to_show = []
+    #@ratings_to_show = params[:rating]
+    
+    if params[:ratings]
+      @ratings_to_show = params[:ratings]
+    else
+        @ratings_to_show = @all_ratings
+    end
+    
+    if !@ratings_to_show
+      @ratings_to_show = Hash.new
+      @all_ratings.each do |rating|
+        @ratings_to_show[rating] = 1
+      end
+    end
+    
+    if @ratings_to_show && @sort
+      @movies = Movie.where(:rating => @ratings_to_show.keys).order(@sort)
+    elsif @ratings_to_show
+      @movies = Movie.where(:rating => @ratings_to_show.keys)
+    elsif @sort
+      @movies = Movie.all.order(@sort)
+    else
+      @movies = Movie.all
+    end
   end
 
   def new
